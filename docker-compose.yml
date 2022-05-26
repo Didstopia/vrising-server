@@ -1,0 +1,53 @@
+# version: "3"
+services:
+
+  vrising:
+
+    # image: didstopia/vrising-server:latest
+    build: .
+    container_name: vrising
+    # restart: unless-stopped
+    restart: "no"
+
+    environment:
+      # Configure the server
+      V_RISING_SERVER_PERSISTENT_DATA_PATH: "/app/vrising_test"
+      V_RISING_SERVER_BRANCH: "public"
+      # V_RISING_SERVER_START_MODE: "0" # Install/update and start server
+      # V_RISING_SERVER_START_MODE: "1" # Install/update and exit
+      V_RISING_SERVER_START_MODE: "2" # Install, skip update check and start server
+      V_RISING_SERVER_UPDATE_MODE: "1" # Enable update checking
+
+      # Customize the server
+      V_RISING_SERVER_NAME: "V Rising Docker Test Server"
+      V_RISING_SERVER_DESCRIPTION: "Test server."
+      V_RISING_SERVER_GAME_PORT: 27015
+      V_RISING_SERVER_QUERY_PORT: 27016
+      V_RISING_SERVER_RCON_PORT: 25575
+      V_RISING_SERVER_RCON_ENABLED: true
+      V_RISING_SERVER_RCON_PASSWORD: "rc0n"
+      V_RISING_SERVER_MAX_CONNECTED_USERS: 2
+      V_RISING_SERVER_MAX_CONNECTED_ADMINS: 1
+      V_RISING_SERVER_SAVE_NAME: "test_server"
+      V_RISING_SERVER_PASSWORD: "t35t"
+      V_RISING_SERVER_LIST_ON_MNASTER_SERVER: false
+      V_RISING_SERVER_AUTO_SAVE_COUNT: 3
+      V_RISING_SERVER_AUTO_SAVE_INTERVAL: 60
+      V_RISING_SERVER_GAME_SETTINGS_PRESET: ""
+
+    ports:
+      - "27015:27015/udp"
+      - "27016:27016/udp"
+      - "25575:25575/tcp"
+
+    volumes:
+      - ./vrising_saves:/app/vrising_test
+      - ./vrising_data:/steamcmd/vrising
+      # - vrising_saves:/app/vrising_test
+      # - vrising_data:/steamcmd/vrising
+
+# volumes:
+#   vrising_saves:
+#     driver: local
+#   vrising_data:
+#     driver: local

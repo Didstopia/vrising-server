@@ -1,0 +1,6 @@
+@sSteamCmdForcePlatformType linux
+force_install_dir /steamcmd/vrising
+login anonymous
+app_info_update 1
+app_update 1829350 validate
+quit
