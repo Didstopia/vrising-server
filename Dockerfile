@@ -1,4 +1,4 @@
-FROM didstopia/base:nodejs-16-steamcmd-ubuntu-20.04
+FROM didstopia/base:nodejs-12-steamcmd-ubuntu-18.04
 
 LABEL maintainer="Didstopia <support@didstopia.com>"
 

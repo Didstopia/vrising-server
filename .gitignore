@@ -2,6 +2,7 @@ vrising_data/
 vrising_saves/
 
 node_modules/
+package-lock.json
 *.log
 .DS_Store
 Thumbs.db
