@@ -8,7 +8,7 @@
 ##       so we can't exactly wait for 1+ minutes, like "announcerestart"
 ##       expects us to be able to, so what do we do? Custom announcements?
 # Send a quick restart announcement to all the players
-rcon announcerestart 0
+rcon "announcerestart 1"
 sleep 5
 
 # Tell the scheduler to terminate
