@@ -3,7 +3,7 @@
 set -m
 
 # Enable debugging
-set -x
+# set -x
 
 # Check if we are auto-updating or not
 if [ "$V_RISING_SERVER_UPDATE_MODE" = "1" ]; then

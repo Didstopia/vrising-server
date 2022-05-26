@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Enable debugging
-set -x
+# set -x
 
 # Tell the scheduler to terminate
 kill -s INT `pgrep -nf scheduler_app/app.js`
