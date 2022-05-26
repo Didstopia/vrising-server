@@ -63,6 +63,6 @@ if [ "$OLD_BUILDID" = "$NEW_BUILDID" ]; then
 else
 	echo "Latest server build id ($NEW_BUILDID) is newer than the current one ($OLD_BUILDID), waiting for client update.."
 	echo $NEW_BUILDID > /steamcmd/vrising/build.id
-	/app/shutdown.sh
+	exec /app/shutdown.sh
 	exit
 fi

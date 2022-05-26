@@ -17,7 +17,7 @@ exit_handler()
 	echo "Shutdown signal received.."
 
 	# Execute the telnet shutdown commands
-	/app/shutdown.sh
+	exec /app/shutdown.sh
 	killer=$!
 	wait "$killer"
 
@@ -88,12 +88,12 @@ else
 
 	# Run the update check if it's not been run before
 	if [ ! -f "/steamcmd/vrising/build.id" ]; then
-		/app/update_check.sh
+		exec /app/update_check.sh
 	else
 		OLD_BUILDID="$(cat /steamcmd/vrising/build.id)"
 		STRING_SIZE=${#OLD_BUILDID}
 		if [ "$STRING_SIZE" -lt "6" ]; then
-			/app/update_check.sh
+			exec /app/update_check.sh
 		fi
 	fi
 fi
@@ -168,6 +168,23 @@ fi
 cat "${V_RISING_SERVER_CONFIG_FILE}" | jq '.Rcon = { "Enabled": env.V_RISING_SERVER_RCON_ENABLED|test("true"), "Password": env.V_RISING_SERVER_RCON_PASSWORD, "Port": env.V_RISING_SERVER_RCON_PORT|tonumber }' > "/tmp/ServerHostSettings.json.tmp"
 cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 
+## FIXME: We should likely ONLY apply these when we first copy the the defaults,
+##        so that users are given the option of manually being able to persist edits to the files?
+## TODO: This should be refactored to use functions, to cut down on boilerplate etc.
+# Apply the server settings
+jq '.Name |= env.V_RISING_SERVER_NAME' "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.Description |= env.V_RISING_SERVER_DESCRIPTION' "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.Port |= env.V_RISING_SERVER_GAME_PORT|tonumber' "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.QueryPort |= env.V_RISING_SERVER_QUERY_PORT|tonumber' "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.MaxConnectedUsers |= env.V_RISING_SERVER_MAX_CONNECTED_USERS|tonumber' "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.MaxConnectedAdmins |= env.V_RISING_SERVER_MAX_CONNECTED_ADMINS|tonumber' "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.SaveName |= env.V_RISING_SERVER_SAVE_NAME' "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.Password |= env.V_RISING_SERVER_PASSWORD' "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.ListOnMasterServer |= env.V_RISING_SERVER_LIST_ON_MNASTER_SERVER|test("true")' "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.AutoSaveCount |= env.V_RISING_SERVER_AUTO_SAVE_COUNT|tonumber' "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.AutoSaveInterval |= env.V_RISING_SERVER_AUTO_SAVE_INTERVAL|tonumber' "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.GameSettingsPreset |= env.V_RISING_SERVER_GAME_SETTINGS_PRESET' "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+
 # Start mode 1 means we only want to update
 if [ "$V_RISING_SERVER_START_MODE" = "1" ]; then
 	echo "Exiting, start mode is 1.."
@@ -182,14 +199,18 @@ node /app/scheduler_app/app.js &
 V_RISING_SERVER_PERSISTENT_DATA_PATH_WINE="Z:$(printf "%s" "$V_RISING_SERVER_PERSISTENT_DATA_PATH" | tr '/' '\\')"
 
 # Construct the startup command
+# V_RISING_SERVER_STARTUP_COMMAND="$(cat << EOF
+# -saveName "${V_RISING_SERVER_SAVE_NAME}"
+# -serverName "${V_RISING_SERVER_NAME}"
+# -persistentDataPath "${V_RISING_SERVER_PERSISTENT_DATA_PATH_WINE}"
+# -maxConnectedUsers "${V_RISING_SERVER_MAX_CONNECTED_USERS}"
+# -maxConnectedAdmins "${V_RISING_SERVER_MAX_CONNECTED_ADMINS}"
+# -gamePort "${V_RISING_SERVER_GAME_PORT}"
+# -queryPort "${V_RISING_SERVER_QUERY_PORT}"
+# EOF
+# )"
 V_RISING_SERVER_STARTUP_COMMAND="$(cat << EOF
--saveName "${V_RISING_SERVER_SAVE_NAME}"
--serverName "${V_RISING_SERVER_NAME}"
 -persistentDataPath "${V_RISING_SERVER_PERSISTENT_DATA_PATH_WINE}"
--maxConnectedUsers "${V_RISING_SERVER_MAX_CONNECTED_USERS}"
--maxConnectedAdmins "${V_RISING_SERVER_MAX_CONNECTED_ADMINS}"
--gamePort "${V_RISING_SERVER_GAME_PORT}"
--queryPort "${V_RISING_SERVER_QUERY_PORT}"
 EOF
 )"
 
