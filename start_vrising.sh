@@ -17,7 +17,7 @@ exit_handler()
 	echo "Shutdown signal received.."
 
 	# Execute the telnet shutdown commands
-	exec /app/shutdown.sh
+	/app/shutdown.sh
 	killer=$!
 	wait "$killer"
 
@@ -88,12 +88,12 @@ else
 
 	# Run the update check if it's not been run before
 	if [ ! -f "/steamcmd/vrising/build.id" ]; then
-		exec /app/update_check.sh
+		/app/update_check.sh
 	else
 		OLD_BUILDID="$(cat /steamcmd/vrising/build.id)"
 		STRING_SIZE=${#OLD_BUILDID}
 		if [ "$STRING_SIZE" -lt "6" ]; then
-			exec /app/update_check.sh
+			/app/update_check.sh
 		fi
 	fi
 fi
