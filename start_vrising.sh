@@ -176,6 +176,7 @@ jq '.Name |= env.V_RISING_SERVER_NAME' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/
 jq '.Description |= env.V_RISING_SERVER_DESCRIPTION' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.Port |= env.V_RISING_SERVER_GAME_PORT|tonumber' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.QueryPort |= env.V_RISING_SERVER_QUERY_PORT|tonumber' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.ClanSize |= env.V_RISING_SERVER_CLAN_SIZE|tonumber' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.MaxConnectedUsers |= env.V_RISING_SERVER_MAX_CONNECTED_USERS|tonumber' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.MaxConnectedAdmins |= env.V_RISING_SERVER_MAX_CONNECTED_ADMINS|tonumber' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.SaveName |= env.V_RISING_SERVER_SAVE_NAME' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
