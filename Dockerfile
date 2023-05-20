@@ -99,6 +99,8 @@ ENV V_RISING_SERVER_AUTO_SAVE_COUNT          50
 ENV V_RISING_SERVER_AUTO_SAVE_INTERVAL       600
 ENV V_RISING_SERVER_GAME_SETTINGS_PRESET     "StandardPvE"
 
+ENV V_RISING_SERVER_GAME_DISABLE_BLOOD_DRAIN false
+
 # Define directories to take ownership of
 ENV CHOWN_DIRS "/steamcmd,/app,/dev/stdout,/dev/stderr"
 

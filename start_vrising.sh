@@ -243,6 +243,17 @@ jq '.AutoSaveInterval |= (env.V_RISING_SERVER_AUTO_SAVE_INTERVAL|tonumber)' "${V
 # echo "Applying custom game configuration file.."
 # cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE} ${V_RISING_SERVER_GAME_CONFIG_FILE_DEFAULT}
 
+# Apply the game settings
+if [ "$V_RISING_SERVER_GAME_DISABLE_BLOOD_DRAIN" = "true" ]; then
+  # Disable castle blood essence drain entirely
+  jq '.CastleBloodEssenceDrainModifier |= 0.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+else
+  # Enable castle blood essence drain, setting it to 1.0, but only if it's currently set to 0.0 (disabled)
+  if [ "$(jq '.CastleBloodEssenceDrainModifier' "${V_RISING_SERVER_GAME_CONFIG_FILE}")" = "0.0" ]; then
+    jq '.CastleBloodEssenceDrainModifier |= 1.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+  fi
+fi
+
 # Start mode 1 means we only want to update
 if [ "$V_RISING_SERVER_START_MODE" = "1" ]; then
 	echo "Exiting, start mode is 1.."
@@ -277,6 +288,8 @@ V_RISING_SERVER_STARTUP_COMMAND="${V_RISING_SERVER_STARTUP_COMMAND//$'\n'/ }"
 
 # Set the working directory
 cd /steamcmd/vrising
+
+## FIXME: Even with the vcrun2015 below, we still get the same error about "VCRUNTIME140_1.dll" missing!?
 
 ## TODO: Test this thoroughly, ideally only install if not already installed etc.
 # Prepare wine
