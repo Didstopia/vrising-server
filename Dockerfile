@@ -69,6 +69,8 @@ ENV V_RISING_SERVER_PERSISTENT_DATA_PATH     "/app/vrising"
 ENV V_RISING_SERVER_BRANCH                   "public"
 ENV V_RISING_SERVER_START_MODE               "0"
 ENV V_RISING_SERVER_UPDATE_MODE              "0"
+ENV V_RISING_SERVER_DEFAULT_HOST_SETTINGS    true
+ENV V_RISING_SERVER_DEFAULT_GAME_SETTINGS    false
 
 # Setup environment variables for customizing the server
 ENV V_RISING_SERVER_NAME                     "V Rising Docker Server"

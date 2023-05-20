@@ -5,7 +5,7 @@
 # set -o pipefail
 
 # Enable debugging
-# set -x
+set -x
 
 # Print the user we're currently running as
 echo "Running as user: $(whoami)"
@@ -129,6 +129,13 @@ if [ ! -f "${V_RISING_SERVER_CONFIG_FILE}" ]; then
 #   echo "Applying custom server configuration file.."
 #   cp -f ${V_RISING_SERVER_CONFIG_FILE} ${V_RISING_SERVER_CONFIG_FILE_DEFAULT}
 fi
+## TODO: Testing if we can just always use a default config file and patch it
+# If V_RISING_SERVER_DEFAULT_HOST_SETTINGS is true, copy the default config file
+# and patch it with jq afterwards.
+if [ "$V_RISING_SERVER_DEFAULT_HOST_SETTINGS" = "true" ]; then
+  echo "Applying default server configuration file.."
+  cp -f ${V_RISING_SERVER_CONFIG_FILE_DEFAULT} ${V_RISING_SERVER_CONFIG_FILE}
+fi
 
 # Copy the default game configuration file if one doesn't yet exist
 V_RISING_SERVER_GAME_CONFIG_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/ServerGameSettings.json"
@@ -139,9 +146,20 @@ if [ ! -f "${V_RISING_SERVER_GAME_CONFIG_FILE}" ]; then
 #   echo "Applying custom game configuration file.."
 #   cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE} ${V_RISING_SERVER_GAME_CONFIG_FILE_DEFAULT}
 fi
+## TODO: Testing if we can just always use a default config file and patch it
+# If V_RISING_SERVER_DEFAULT_GAME_SETTINGS is true, copy the default config file
+# and patch it with jq afterwards.
+if [ "$V_RISING_SERVER_DEFAULT_GAME_SETTINGS" = "true" ]; then
+  echo "Applying default game configuration file.."
+  cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE_DEFAULT} ${V_RISING_SERVER_GAME_CONFIG_FILE}
+fi
 
 # Copy admin list file if one doesn't yet exist
 V_RISING_SERVER_ADMIN_LIST_FILE_DEFAULT="/steamcmd/vrising/VRisingServer_Data/StreamingAssets/Settings/adminlist.txt"
+if [ ! -f "${V_RISING_SERVER_ADMIN_LIST_FILE_DEFAULT}" ]; then
+  echo "Default admin list not found, creating an empty file.."
+  touch ${V_RISING_SERVER_ADMIN_LIST_FILE_DEFAULT}
+fi
 V_RISING_SERVER_ADMIN_LIST_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/adminlist.txt"
 if [ ! -f "${V_RISING_SERVER_ADMIN_LIST_FILE}" ]; then
 	echo "Admin list file not found, creating a new one.."
@@ -154,6 +172,10 @@ fi
 
 # Copy ban list file if one doesn't yet exist
 V_RISING_SERVER_BAN_LIST_FILE_DEFAULT="/steamcmd/vrising/VRisingServer_Data/StreamingAssets/Settings/banlist.txt"
+if [ ! -f "${V_RISING_SERVER_BAN_LIST_FILE_DEFAULT}" ]; then
+  echo "Default ban list not found, creating an empty file.."
+  touch ${V_RISING_SERVER_BAN_LIST_FILE_DEFAULT}
+fi
 V_RISING_SERVER_BAN_LIST_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/banlist.txt"
 if [ ! -f "${V_RISING_SERVER_BAN_LIST_FILE}" ]; then
 	echo "Ban list file not found, creating a new one.."
@@ -188,19 +210,19 @@ fi
 # Apply the server settings
 jq '.Name |= env.V_RISING_SERVER_NAME' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.Description |= env.V_RISING_SERVER_DESCRIPTION' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.Address |= env.V_RISING_SERVER_BIND_IP' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.Port |= env.V_RISING_SERVER_GAME_PORT|tonumber' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.QueryPort |= env.V_RISING_SERVER_QUERY_PORT|tonumber' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.Address |= env.V_RISING_SERVER_BIND_IP' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.MaxConnectedUsers |= env.V_RISING_SERVER_MAX_CONNECTED_USERS|tonumber' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.MaxConnectedAdmins |= env.V_RISING_SERVER_MAX_CONNECTED_ADMINS|tonumber' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.SaveName |= env.V_RISING_SERVER_SAVE_NAME' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.Password |= env.V_RISING_SERVER_PASSWORD' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.ListOnMasterServer |= env.V_RISING_SERVER_LIST_ON_MASTER_SERVER|test("true")' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+# jq '.ListOnMasterServer |= env.V_RISING_SERVER_LIST_ON_MASTER_SERVER|test("true")' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.ListOnSteam |= env.V_RISING_SERVER_LIST_ON_STEAM|test("true")' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.ListOnEOS |= env.V_RISING_SERVER_LIST_ON_EOS|test("true")' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.GameSettingsPreset |= env.V_RISING_SERVER_GAME_SETTINGS_PRESET' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.SaveName |= env.V_RISING_SERVER_SAVE_NAME' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.AutoSaveCount |= env.V_RISING_SERVER_AUTO_SAVE_COUNT|tonumber' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.AutoSaveInterval |= env.V_RISING_SERVER_AUTO_SAVE_INTERVAL|tonumber' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.GameSettingsPreset |= env.V_RISING_SERVER_GAME_SETTINGS_PRESET' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 
 ## TODO: Why would we copy over the defaults if we have the persistence path set?
 # echo "Applying custom server configuration file.."
