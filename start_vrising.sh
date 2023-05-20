@@ -304,7 +304,7 @@ echo "Starting server with arguments: ${V_RISING_SERVER_STARTUP_COMMAND}"
 xvfb-run \
   --auto-servernum \
   --server-args='-screen 0 640x480x24:32 -nolisten tcp -nolisten unix' \
-  bash -c "winetricks -q vcrun2015; wine /steamcmd/vrising/VRisingServer.exe ${V_RISING_SERVER_STARTUP_COMMAND}" &
+  bash -c "winetricks -q vcrun2015; winetricks -q vcrun2017; winetricks -q vcrun2019; wine /steamcmd/vrising/VRisingServer.exe ${V_RISING_SERVER_STARTUP_COMMAND}" &
 
 child=$!
 wait "$child"
