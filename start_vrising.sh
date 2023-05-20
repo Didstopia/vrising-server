@@ -207,6 +207,14 @@ if [ "$V_RISING_SERVER_BIND_IP_AUTO_DETECT" = "true" ]; then
   echo "Public IP address detected as: $V_RISING_SERVER_BIND_IP"
 fi
 
+##
+## FIXME: EOS (Epic Online Services) do not work due to the following WINE error:
+##
+##          002f:err:module:import_dll Library VCRUNTIME140_1.dll
+##            (which is needed by L"Z:\\steamcmd\\vrising\\VRisingServer_Data\\Plugins\\x86_64\\EOSSDK-Win64-Shipping.dll")
+##          not found
+##
+
 ## FIXME: We should likely ONLY apply these when we first copy the the defaults,
 ##        so that users are given the option of manually being able to persist edits to the files?
 ## TODO: This should be refactored to use functions, to cut down on boilerplate etc.
@@ -221,7 +229,7 @@ jq '.MaxConnectedAdmins |= (env.V_RISING_SERVER_MAX_CONNECTED_ADMINS|tonumber)' 
 jq '.Password |= (env.V_RISING_SERVER_PASSWORD)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 # jq '.ListOnMasterServer |= env.V_RISING_SERVER_LIST_ON_MASTER_SERVER|test("true")' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.ListOnSteam |= (env.V_RISING_SERVER_LIST_ON_STEAM|test("true"))' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.ListOnEOS |= (env.V_RISING_SERVER_LIST_ON_EOS|test("true"))' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+jq '.ListOnEOS |= (env.V_RISING_SERVER_LIST_ON_EPIC_EOS|test("true"))' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.GameSettingsPreset |= (env.V_RISING_SERVER_GAME_SETTINGS_PRESET)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.SaveName |= (env.V_RISING_SERVER_SAVE_NAME)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
 jq '.AutoSaveCount |= (env.V_RISING_SERVER_AUTO_SAVE_COUNT|tonumber)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
@@ -270,12 +278,20 @@ V_RISING_SERVER_STARTUP_COMMAND="${V_RISING_SERVER_STARTUP_COMMAND//$'\n'/ }"
 # Set the working directory
 cd /steamcmd/vrising
 
+## TODO: Test this thoroughly, ideally only install if not already installed etc.
+# Prepare wine
+# echo "Preparing wine.."
+# xvfb-run \
+#   --auto-servernum \
+#   --server-args='-screen 0 640x480x24:32 -nolisten tcp -nolisten unix' \
+#   bash -c "winetricks -q vcrun2015"
+
 # Run the server
 echo "Starting server with arguments: ${V_RISING_SERVER_STARTUP_COMMAND}"
 xvfb-run \
   --auto-servernum \
   --server-args='-screen 0 640x480x24:32 -nolisten tcp -nolisten unix' \
-  bash -c "wine /steamcmd/vrising/VRisingServer.exe ${V_RISING_SERVER_STARTUP_COMMAND}" &
+  bash -c "winetricks -q vcrun2015; wine /steamcmd/vrising/VRisingServer.exe ${V_RISING_SERVER_STARTUP_COMMAND}" &
 
 child=$!
 wait "$child"
