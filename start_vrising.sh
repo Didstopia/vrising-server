@@ -244,6 +244,13 @@ jq '.AutoSaveInterval |= (env.V_RISING_SERVER_AUTO_SAVE_INTERVAL|tonumber)' "${V
 # cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE} ${V_RISING_SERVER_GAME_CONFIG_FILE_DEFAULT}
 
 # Apply the game settings
+if [ "$V_RISING_SERVER_GAME_ENABLE_PVP" = "true" ]; then
+  # Enable PvP by setting "GameModeType" to "PvP"
+  jq '.GameModeType |= "PvP"' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+else
+  # Disable PvP and enable PvE by setting "GameModeType" to "PvE"
+  jq '.GameModeType |= "PvE"' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+fi
 if [ "$V_RISING_SERVER_GAME_DISABLE_BLOOD_DRAIN" = "true" ]; then
   # Disable castle blood essence drain entirely
   jq '.CastleBloodEssenceDrainModifier |= 0.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
@@ -304,7 +311,8 @@ echo "Starting server with arguments: ${V_RISING_SERVER_STARTUP_COMMAND}"
 xvfb-run \
   --auto-servernum \
   --server-args='-screen 0 640x480x24:32 -nolisten tcp -nolisten unix' \
-  bash -c "winetricks -q vcrun2015; winetricks -q vcrun2017; winetricks -q vcrun2019; wine /steamcmd/vrising/VRisingServer.exe ${V_RISING_SERVER_STARTUP_COMMAND}" &
+  bash -c "wine /steamcmd/vrising/VRisingServer.exe ${V_RISING_SERVER_STARTUP_COMMAND}" &
+  # bash -c "winetricks -q vcrun2015; winetricks -q vcrun2017; winetricks -q vcrun2019; wine /steamcmd/vrising/VRisingServer.exe ${V_RISING_SERVER_STARTUP_COMMAND}" &
 
 child=$!
 wait "$child"
