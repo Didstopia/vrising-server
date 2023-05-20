@@ -260,6 +260,15 @@ else
     jq '.CastleBloodEssenceDrainModifier |= 1.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
   fi
 fi
+if [ "$V_RISING_SERVER_GAME_DISABLE_DECAY" = "true" ]; then
+  # Disable castle decaying entirely
+  jq '.CastleDecayRateModifier |= 0.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+else
+  # Enable castle decaying, setting it to 1.0, but only if it's currently set to 0.0 (disabled)
+  if [ "$(jq '.CastleDecayRateModifier' "${V_RISING_SERVER_GAME_CONFIG_FILE}")" = "0.0" ]; then
+    jq '.CastleDecayRateModifier |= 1.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+  fi
+fi
 
 # Start mode 1 means we only want to update
 if [ "$V_RISING_SERVER_START_MODE" = "1" ]; then
