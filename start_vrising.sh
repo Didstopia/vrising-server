@@ -5,7 +5,7 @@
 # set -o pipefail
 
 # Enable debugging
-set -x
+# set -x
 
 # Print the user we're currently running as
 echo "Running as user: $(whoami)"
@@ -120,8 +120,11 @@ fi
 ##       see if they exist or not, copy defaults or apply custom ones,
 ##       instead of processing them manually like this!
 
+# Always ensure that our settings folder exists
+mkdir -p "${V_RISING_SERVER_PERSISTENT_DATA_PATH}/Settings"
+
 # Copy the default server configuration file if one doesn't yet exist
-V_RISING_SERVER_CONFIG_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/ServerHostSettings.json"
+V_RISING_SERVER_CONFIG_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/Settings/ServerHostSettings.json"
 if [ ! -f "${V_RISING_SERVER_CONFIG_FILE}" ]; then
 	echo "Server configuration file not found, creating a new one.."
 	cp ${V_RISING_SERVER_CONFIG_FILE_DEFAULT} ${V_RISING_SERVER_CONFIG_FILE}
@@ -138,7 +141,7 @@ if [ "$V_RISING_SERVER_DEFAULT_HOST_SETTINGS" = "true" ]; then
 fi
 
 # Copy the default game configuration file if one doesn't yet exist
-V_RISING_SERVER_GAME_CONFIG_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/ServerGameSettings.json"
+V_RISING_SERVER_GAME_CONFIG_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/Settings/ServerGameSettings.json"
 if [ ! -f "${V_RISING_SERVER_GAME_CONFIG_FILE}" ]; then
 	echo "Game configuration file not found, creating a new one.."
 	cp ${V_RISING_SERVER_GAME_CONFIG_FILE_DEFAULT} ${V_RISING_SERVER_GAME_CONFIG_FILE}
@@ -160,7 +163,7 @@ if [ ! -f "${V_RISING_SERVER_ADMIN_LIST_FILE_DEFAULT}" ]; then
   echo "Default admin list not found, creating an empty file.."
   touch ${V_RISING_SERVER_ADMIN_LIST_FILE_DEFAULT}
 fi
-V_RISING_SERVER_ADMIN_LIST_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/adminlist.txt"
+V_RISING_SERVER_ADMIN_LIST_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/Settings/adminlist.txt"
 if [ ! -f "${V_RISING_SERVER_ADMIN_LIST_FILE}" ]; then
 	echo "Admin list file not found, creating a new one.."
 	cp ${V_RISING_SERVER_ADMIN_LIST_FILE_DEFAULT} ${V_RISING_SERVER_ADMIN_LIST_FILE}
@@ -176,7 +179,7 @@ if [ ! -f "${V_RISING_SERVER_BAN_LIST_FILE_DEFAULT}" ]; then
   echo "Default ban list not found, creating an empty file.."
   touch ${V_RISING_SERVER_BAN_LIST_FILE_DEFAULT}
 fi
-V_RISING_SERVER_BAN_LIST_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/banlist.txt"
+V_RISING_SERVER_BAN_LIST_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/Settings/banlist.txt"
 if [ ! -f "${V_RISING_SERVER_BAN_LIST_FILE}" ]; then
 	echo "Ban list file not found, creating a new one.."
 	cp ${V_RISING_SERVER_BAN_LIST_FILE_DEFAULT} ${V_RISING_SERVER_BAN_LIST_FILE}
