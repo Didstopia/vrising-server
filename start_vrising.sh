@@ -249,7 +249,9 @@ if [ "$V_RISING_SERVER_GAME_ENABLE_PVP" = "true" ]; then
   jq '.GameModeType |= "PvP"' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
 else
   # Disable PvP and enable PvE by setting "GameModeType" to "PvE"
-  jq '.GameModeType |= "PvE"' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+  if [ "$(jq '.GameModeType' "${V_RISING_SERVER_GAME_CONFIG_FILE}")" = "PvP" ]; then
+    jq '.GameModeType |= "PvE"' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+  fi
 fi
 if [ "$V_RISING_SERVER_GAME_DISABLE_BLOOD_DRAIN" = "true" ]; then
   # Disable castle blood essence drain entirely
