@@ -11,7 +11,7 @@ services:
 
     environment:
       # Configure the server
-      V_RISING_SERVER_PERSISTENT_DATA_PATH: "/app/vrising_test"
+      V_RISING_SERVER_PERSISTENT_DATA_PATH: "/app/vrising"
       V_RISING_SERVER_BRANCH: "public"
       # V_RISING_SERVER_START_MODE: "0" # Install/update and start server
       # V_RISING_SERVER_START_MODE: "1" # Install/update and exit
@@ -43,7 +43,7 @@ services:
       - "9878:9878/tcp"
 
     volumes:
-      - ./vrising_saves:/app/vrising_test
+      - ./vrising_saves:/app/vrising
       - ./vrising_data:/steamcmd/vrising
       # - vrising_saves:/app/vrising_test
       # - vrising_data:/steamcmd/vrising
