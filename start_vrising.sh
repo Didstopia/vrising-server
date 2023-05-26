@@ -117,8 +117,8 @@ fi
 
 
 # Validate that the default server configuration file exists
-V_RISING_SERVER_CONFIG_FILE_DEFAULT="/steamcmd/vrising/VRisingServer_Data/StreamingAssets/Settings/ServerHostSettings.json"
-if [ ! -f "${V_RISING_SERVER_CONFIG_FILE_DEFAULT}" ]; then
+V_RISING_SERVER_HOST_CONFIG_FILE_DEFAULT="/steamcmd/vrising/VRisingServer_Data/StreamingAssets/Settings/ServerHostSettings.json"
+if [ ! -f "${V_RISING_SERVER_HOST_CONFIG_FILE_DEFAULT}" ]; then
 	echo "ERROR: Default server configuration file not found, are you sure the server is up to date?"
 	exit 1
 fi
@@ -140,20 +140,20 @@ fi
 mkdir -p "${V_RISING_SERVER_PERSISTENT_DATA_PATH}/Settings"
 
 # Copy the default server configuration file if one doesn't yet exist
-V_RISING_SERVER_CONFIG_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/Settings/ServerHostSettings.json"
-if [ ! -f "${V_RISING_SERVER_CONFIG_FILE}" ]; then
+V_RISING_SERVER_HOST_CONFIG_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/Settings/ServerHostSettings.json"
+if [ ! -f "${V_RISING_SERVER_HOST_CONFIG_FILE}" ]; then
 	echo "Server configuration file not found, creating a new one.."
-	cp ${V_RISING_SERVER_CONFIG_FILE_DEFAULT} ${V_RISING_SERVER_CONFIG_FILE}
+	cp ${V_RISING_SERVER_HOST_CONFIG_FILE_DEFAULT} ${V_RISING_SERVER_HOST_CONFIG_FILE}
 # else
 #   echo "Applying custom server configuration file.."
-#   cp -f ${V_RISING_SERVER_CONFIG_FILE} ${V_RISING_SERVER_CONFIG_FILE_DEFAULT}
+#   cp -f ${V_RISING_SERVER_HOST_CONFIG_FILE} ${V_RISING_SERVER_HOST_CONFIG_FILE}
 fi
 ## TODO: Testing if we can just always use a default config file and patch it
 # If V_RISING_SERVER_DEFAULT_HOST_SETTINGS is true, copy the default config file
 # and patch it with jq afterwards.
 if [ "$V_RISING_SERVER_DEFAULT_HOST_SETTINGS" = "true" ]; then
-  echo "Applying default server configuration file.."
-  cp -f ${V_RISING_SERVER_CONFIG_FILE_DEFAULT} ${V_RISING_SERVER_CONFIG_FILE}
+	echo "Applying default server configuration file.."
+	cp -f ${V_RISING_SERVER_HOST_CONFIG_FILE_DEFAULT} ${V_RISING_SERVER_HOST_CONFIG_FILE}
 fi
 
 # Copy the default game configuration file if one doesn't yet exist
@@ -169,15 +169,15 @@ fi
 # If V_RISING_SERVER_DEFAULT_GAME_SETTINGS is true, copy the default config file
 # and patch it with jq afterwards.
 if [ "$V_RISING_SERVER_DEFAULT_GAME_SETTINGS" = "true" ]; then
-  echo "Applying default game configuration file.."
-  cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE_DEFAULT} ${V_RISING_SERVER_GAME_CONFIG_FILE}
+	echo "Applying default game configuration file.."
+	cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE_DEFAULT} ${V_RISING_SERVER_GAME_CONFIG_FILE}
 fi
 
 # Copy admin list file if one doesn't yet exist
 V_RISING_SERVER_ADMIN_LIST_FILE_DEFAULT="/steamcmd/vrising/VRisingServer_Data/StreamingAssets/Settings/adminlist.txt"
 if [ ! -f "${V_RISING_SERVER_ADMIN_LIST_FILE_DEFAULT}" ]; then
-  echo "Default admin list not found, creating an empty file.."
-  touch ${V_RISING_SERVER_ADMIN_LIST_FILE_DEFAULT}
+	echo "Default admin list not found, creating an empty file.."
+	touch ${V_RISING_SERVER_ADMIN_LIST_FILE_DEFAULT}
 fi
 V_RISING_SERVER_ADMIN_LIST_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/Settings/adminlist.txt"
 if [ ! -f "${V_RISING_SERVER_ADMIN_LIST_FILE}" ]; then
@@ -192,8 +192,8 @@ fi
 # Copy ban list file if one doesn't yet exist
 V_RISING_SERVER_BAN_LIST_FILE_DEFAULT="/steamcmd/vrising/VRisingServer_Data/StreamingAssets/Settings/banlist.txt"
 if [ ! -f "${V_RISING_SERVER_BAN_LIST_FILE_DEFAULT}" ]; then
-  echo "Default ban list not found, creating an empty file.."
-  touch ${V_RISING_SERVER_BAN_LIST_FILE_DEFAULT}
+	echo "Default ban list not found, creating an empty file.."
+	touch ${V_RISING_SERVER_BAN_LIST_FILE_DEFAULT}
 fi
 V_RISING_SERVER_BAN_LIST_FILE="${V_RISING_SERVER_PERSISTENT_DATA_PATH}/Settings/banlist.txt"
 if [ ! -f "${V_RISING_SERVER_BAN_LIST_FILE}" ]; then
@@ -208,19 +208,20 @@ fi
 ## TODO: This is a bit dumb at the moment, as it's always replacing the file,
 ##       even though it doesn't strictly need to, but same goes for the files above..
 # Setup and/or configure RCON
-cat "${V_RISING_SERVER_CONFIG_FILE}" | jq '.Rcon = { "Enabled": (env.V_RISING_SERVER_RCON_ENABLED|test("true")), "Password": (env.V_RISING_SERVER_RCON_PASSWORD), "Port": (env.V_RISING_SERVER_RCON_PORT|tonumber) }' > "/tmp/ServerHostSettings.json.tmp"
-cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+if [ "$V_RISING_SERVER_DEFAULT_HOST_SETTINGS" = "true" ]; then
+	cat "${V_RISING_SERVER_HOST_CONFIG_FILE}" | jq '.Rcon = { "Enabled": (env.V_RISING_SERVER_RCON_ENABLED|test("true")), "Password": (env.V_RISING_SERVER_RCON_PASSWORD), "Port": (env.V_RISING_SERVER_RCON_PORT|tonumber) }' > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+fi
 
 # If V_RISING_SERVER_BIND_IP_AUTO_DETECT is set to true, try to detect the public IP address,
 # overriding the V_RISING_SERVER_BIND_IP setting if we get a valid IP address back
 if [ "$V_RISING_SERVER_BIND_IP_AUTO_DETECT" = "true" ]; then
-  echo "Auto-detecting public IP address.."
-  export V_RISING_SERVER_BIND_IP="$(curl -s https://api.ipify.org)"
-  if [ $? -ne 0 ]; then
-    echo "Failed to auto-detect public IP address, exiting.."
-    exit 1
-  fi
-  echo "Public IP address detected as: $V_RISING_SERVER_BIND_IP"
+	echo "Auto-detecting public IP address.."
+	export V_RISING_SERVER_BIND_IP="$(curl -s https://api.ipify.org)"
+	if [ $? -ne 0 ]; then
+		echo "Failed to auto-detect public IP address, exiting.."
+		exit 1
+	fi
+	echo "Public IP address detected as: $V_RISING_SERVER_BIND_IP"
 fi
 
 ##
@@ -235,57 +236,61 @@ fi
 ##        so that users are given the option of manually being able to persist edits to the files?
 ## TODO: This should be refactored to use functions, to cut down on boilerplate etc.
 # Apply the server settings
-jq '.Name |= (env.V_RISING_SERVER_NAME)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.Description |= (env.V_RISING_SERVER_DESCRIPTION)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.Port |= (env.V_RISING_SERVER_GAME_PORT|tonumber)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.QueryPort |= (env.V_RISING_SERVER_QUERY_PORT|tonumber)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.Address |= (env.V_RISING_SERVER_BIND_IP)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.MaxConnectedUsers |= (env.V_RISING_SERVER_MAX_CONNECTED_USERS|tonumber)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.MaxConnectedAdmins |= (env.V_RISING_SERVER_MAX_CONNECTED_ADMINS|tonumber)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.Password |= (env.V_RISING_SERVER_PASSWORD)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-# jq '.ListOnMasterServer |= env.V_RISING_SERVER_LIST_ON_MASTER_SERVER|test("true")' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.ListOnSteam |= (env.V_RISING_SERVER_LIST_ON_STEAM|test("true"))' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.ListOnEOS |= (env.V_RISING_SERVER_LIST_ON_EPIC_EOS|test("true"))' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.GameSettingsPreset |= (env.V_RISING_SERVER_GAME_SETTINGS_PRESET)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.SaveName |= (env.V_RISING_SERVER_SAVE_NAME)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.AutoSaveCount |= (env.V_RISING_SERVER_AUTO_SAVE_COUNT|tonumber)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
-jq '.AutoSaveInterval |= (env.V_RISING_SERVER_AUTO_SAVE_INTERVAL|tonumber)' "${V_RISING_SERVER_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_CONFIG_FILE}"
+if [ "$V_RISING_SERVER_DEFAULT_HOST_SETTINGS" = "true" ]; then
+	jq '.Name |= env.V_RISING_SERVER_NAME' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	jq '.Description |= env.V_RISING_SERVER_DESCRIPTION' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	jq '.Port |= (env.V_RISING_SERVER_GAME_PORT|tonumber' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	jq '.QueryPort |= (env.V_RISING_SERVER_QUERY_PORT|tonumber)' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	jq '.Address |= env.V_RISING_SERVER_BIND_IP' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	jq '.MaxConnectedUsers |= (env.V_RISING_SERVER_MAX_CONNECTED_USERS|tonumber)' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	jq '.MaxConnectedAdmins |= (env.V_RISING_SERVER_MAX_CONNECTED_ADMINS|tonumber)' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	jq '.Password |= env.V_RISING_SERVER_PASSWORD' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	# jq '.ListOnMasterServer |= env.V_RISING_SERVER_LIST_ON_MASTER_SERVER|test("true")' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	jq '.ListOnSteam |= env.V_RISING_SERVER_LIST_ON_STEAM|test("true")' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	jq '.ListOnEOS |= env.V_RISING_SERVER_LIST_ON_EPIC_EOS|test("true")' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	jq '.GameSettingsPreset |= env.V_RISING_SERVER_GAME_SETTINGS_PRESET' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	jq '.SaveName |= env.V_RISING_SERVER_SAVE_NAME' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	jq '.AutoSaveCount |= (env.V_RISING_SERVER_AUTO_SAVE_COUNT|tonumber)' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+	jq '.AutoSaveInterval |= (env.V_RISING_SERVER_AUTO_SAVE_INTERVAL|tonumber)' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+fi
 
 ## TODO: Why would we copy over the defaults if we have the persistence path set?
 # echo "Applying custom server configuration file.."
-# cp -f ${V_RISING_SERVER_CONFIG_FILE} ${V_RISING_SERVER_CONFIG_FILE_DEFAULT}
+# cp -f ${V_RISING_SERVER_HOST_CONFIG_FILE} ${V_RISING_SERVER_HOST_CONFIG_FILE_DEFAULT}
 
 ## TODO: Why would we copy over the defaults if we have the persistence path set?
 # echo "Applying custom game configuration file.."
 # cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE} ${V_RISING_SERVER_GAME_CONFIG_FILE_DEFAULT}
 
 # Apply the game settings
-if [ "$V_RISING_SERVER_GAME_ENABLE_PVP" = "true" ]; then
-  # Enable PvP by setting "GameModeType" to "PvP"
-  jq '.GameModeType |= "PvP"' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
-else
-  # Disable PvP and enable PvE by setting "GameModeType" to "PvE"
-  if [ "$(jq '.GameModeType' "${V_RISING_SERVER_GAME_CONFIG_FILE}")" = "PvP" ]; then
-    jq '.GameModeType |= "PvE"' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
-  fi
-fi
-if [ "$V_RISING_SERVER_GAME_DISABLE_BLOOD_DRAIN" = "true" ]; then
-  # Disable castle blood essence drain entirely
-  jq '.CastleBloodEssenceDrainModifier |= 0.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
-else
-  # Enable castle blood essence drain, setting it to 1.0, but only if it's currently set to 0.0 (disabled)
-  if [ "$(jq '.CastleBloodEssenceDrainModifier' "${V_RISING_SERVER_GAME_CONFIG_FILE}")" = "0.0" ]; then
-    jq '.CastleBloodEssenceDrainModifier |= 1.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
-  fi
-fi
-if [ "$V_RISING_SERVER_GAME_DISABLE_DECAY" = "true" ]; then
-  # Disable castle decaying entirely
-  jq '.CastleDecayRateModifier |= 0.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
-else
-  # Enable castle decaying, setting it to 1.0, but only if it's currently set to 0.0 (disabled)
-  if [ "$(jq '.CastleDecayRateModifier' "${V_RISING_SERVER_GAME_CONFIG_FILE}")" = "0.0" ]; then
-    jq '.CastleDecayRateModifier |= 1.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
-  fi
+if [ "$V_RISING_SERVER_DEFAULT_GAME_SETTINGS" = "true" ]; then
+	if [ "$V_RISING_SERVER_GAME_ENABLE_PVP" = "true" ]; then
+		# Enable PvP by setting "GameModeType" to "PvP"
+		jq '.GameModeType |= "PvP"' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+	else
+		# Disable PvP and enable PvE by setting "GameModeType" to "PvE"
+		if [ "$(jq '.GameModeType' "${V_RISING_SERVER_GAME_CONFIG_FILE}")" = "PvP" ]; then
+			jq '.GameModeType |= "PvE"' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+		fi
+	fi
+	if [ "$V_RISING_SERVER_GAME_DISABLE_BLOOD_DRAIN" = "true" ]; then
+		# Disable castle blood essence drain entirely
+		jq '.CastleBloodEssenceDrainModifier |= 0.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+	else
+		# Enable castle blood essence drain, setting it to 1.0, but only if it's currently set to 0.0 (disabled)
+		if [ "$(jq '.CastleBloodEssenceDrainModifier' "${V_RISING_SERVER_GAME_CONFIG_FILE}")" = "0.0" ]; then
+			jq '.CastleBloodEssenceDrainModifier |= 1.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+		fi
+	fi
+	if [ "$V_RISING_SERVER_GAME_DISABLE_DECAY" = "true" ]; then
+		# Disable castle decaying entirely
+		jq '.CastleDecayRateModifier |= 0.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+	else
+		# Enable castle decaying, setting it to 1.0, but only if it's currently set to 0.0 (disabled)
+		if [ "$(jq '.CastleDecayRateModifier' "${V_RISING_SERVER_GAME_CONFIG_FILE}")" = "0.0" ]; then
+			jq '.CastleDecayRateModifier |= 1.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+		fi
+	fi
 fi
 
 # Start mode 1 means we only want to update
@@ -329,17 +334,17 @@ cd /steamcmd/vrising
 # Prepare wine
 # echo "Preparing wine.."
 # xvfb-run \
-#   --auto-servernum \
-#   --server-args='-screen 0 640x480x24:32 -nolisten tcp -nolisten unix' \
-#   bash -c "winetricks -q vcrun2015"
+# 	--auto-servernum \
+# 	--server-args='-screen 0 640x480x24:32 -nolisten tcp -nolisten unix' \
+# 	bash -c "winetricks -q vcrun2015"
 
 # Run the server
 echo "Starting server with arguments: ${V_RISING_SERVER_STARTUP_COMMAND}"
 xvfb-run \
-  --auto-servernum \
-  --server-args='-screen 0 640x480x24:32 -nolisten tcp -nolisten unix' \
-  bash -c "wine /steamcmd/vrising/VRisingServer.exe ${V_RISING_SERVER_STARTUP_COMMAND}" &
-  # bash -c "winetricks -q vcrun2015; winetricks -q vcrun2017; winetricks -q vcrun2019; wine /steamcmd/vrising/VRisingServer.exe ${V_RISING_SERVER_STARTUP_COMMAND}" &
+	--auto-servernum \
+	--server-args='-screen 0 640x480x24:32 -nolisten tcp -nolisten unix' \
+	bash -c "wine /steamcmd/vrising/VRisingServer.exe ${V_RISING_SERVER_STARTUP_COMMAND}" &
+	# bash -c "winetricks -q vcrun2015; winetricks -q vcrun2017; winetricks -q vcrun2019; wine /steamcmd/vrising/VRisingServer.exe ${V_RISING_SERVER_STARTUP_COMMAND}" &
 
 child=$!
 wait "$child"
