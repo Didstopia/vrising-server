@@ -55,6 +55,22 @@ install_or_update()
 		echo "Exiting, steamcmd install or update failed!"
 		exit 1
 	fi
+	
+	## TODO: Make this dynamic and put it in the base image, so it'll find the burst compiler on its own!
+	##
+	## HACK: Fix Unity Burst Compiler's AVX requirements
+	##
+	## Original source:
+	##   https://github.com/TrueOsiris/docker-vrising/pull/37
+	##
+	if ! grep -o 'avx[^ ]*' /proc/cpuinfo; then
+		unsupported_file="VRisingServer_Data/Plugins/x86_64/lib_burst_generated.dll"
+		echo "WARNING: CPU does not support AVX/AVX2, disabling Unity Burst Compiler!"
+		if [ -f "/steamcmd/vrising/${unsupported_file}" ]; then
+			echo "Changing ${unsupported_file} as attempt to fix issues..."
+			mv "/steamcmd/vrising/${unsupported_file}" "/steamcmd/vrising/${unsupported_file}.bak"
+		fi
+	fi
 }
 
 # Check which branch to use
