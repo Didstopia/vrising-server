@@ -103,7 +103,8 @@ ENV V_RISING_SERVER_GAME_DISABLE_BLOOD_DRAIN false
 ENV V_RISING_SERVER_GAME_DISABLE_DECAY       false
 
 # Define directories to take ownership of
-ENV CHOWN_DIRS "/steamcmd,/app,\${V_RISING_SERVER_PERSISTENT_DATA_PATH},/dev/stdout,/dev/stderr"
+ENV CHOWN_DIRS "/steamcmd,/app,/dev/stdout,/dev/stderr"
+#ENV CHOWN_DIRS "/steamcmd,/app,\${V_RISING_SERVER_PERSISTENT_DATA_PATH},/dev/stdout,/dev/stderr"
 
 # Expose the volumes
 VOLUME [ "/steamcmd/vrising", "/app/vrising" ]
