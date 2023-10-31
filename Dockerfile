@@ -1,4 +1,4 @@
-FROM didstopia/base:nodejs-12-steamcmd-ubuntu-18.04
+FROM --platform=amd64 didstopia/base:nodejs-12-steamcmd-ubuntu-18.04
 
 LABEL maintainer="Didstopia <support@didstopia.com>"
 
@@ -16,10 +16,14 @@ RUN apt-get update && \
       wine-stable \
       wine32 \
       wine64 \
+      winetricks \
       screen \
       net-tools \
       iproute2 && \
     rm -rf /var/lib/apt/lists/*
+
+# Install VC redistributables
+# RUN winetricks -q vcrun2015 vcrun2017 vcrun2019
 
 # Create the volume directories
 RUN mkdir -p /steamcmd/vrising /app/vrising
@@ -69,11 +73,16 @@ ENV V_RISING_SERVER_PERSISTENT_DATA_PATH     "/app/vrising"
 ENV V_RISING_SERVER_BRANCH                   "public"
 ENV V_RISING_SERVER_START_MODE               "0"
 ENV V_RISING_SERVER_UPDATE_MODE              "0"
+ENV V_RISING_SERVER_DEFAULT_HOST_SETTINGS    true
+ENV V_RISING_SERVER_DEFAULT_GAME_SETTINGS    true
 
 # Setup environment variables for customizing the server
 ENV V_RISING_SERVER_NAME                     "V Rising Docker Server"
 ENV V_RISING_SERVER_DESCRIPTION              "V Rising server running inside a Docker container."
-ENV V_RISING_SERVER_BIND_IP                  "127.0.0.1"
+# ENV V_RISING_SERVER_BIND_IP                  "127.0.0.1"
+# ENV V_RISING_SERVER_BIND_IP                  "0.0.0.0"
+ENV V_RISING_SERVER_BIND_IP                  ""
+ENV V_RISING_SERVER_BIND_IP_AUTO_DETECT      false
 ENV V_RISING_SERVER_GAME_PORT                9876
 ENV V_RISING_SERVER_QUERY_PORT               9877
 ENV V_RISING_SERVER_RCON_PORT                9878
@@ -83,16 +92,22 @@ ENV V_RISING_SERVER_MAX_CONNECTED_USERS      40
 ENV V_RISING_SERVER_MAX_CONNECTED_ADMINS     4
 ENV V_RISING_SERVER_SAVE_NAME                "docker"
 ENV V_RISING_SERVER_PASSWORD                 ""
-ENV V_RISING_SERVER_LIST_ON_MNASTER_SERVER   true
+ENV V_RISING_SERVER_LIST_ON_STEAM            true
+ENV V_RISING_SERVER_LIST_ON_EPIC_EOS         false
 ENV V_RISING_SERVER_AUTO_SAVE_COUNT          50
-ENV V_RISING_SERVER_AUTO_SAVE_INTERVAL       600
+
+ENV V_RISING_SERVER_AUTO_SAVE_INTERVAL       300
 ENV V_RISING_SERVER_GAME_SETTINGS_PRESET     "Custom"
 ENV V_RISING_SERVER_CLAN_SIZE                4
 
+ENV V_RISING_SERVER_GAME_ENABLE_PVP          false
+ENV V_RISING_SERVER_GAME_DISABLE_BLOOD_DRAIN false
+ENV V_RISING_SERVER_GAME_DISABLE_DECAY       false
+
 # Define directories to take ownership of
 ENV CHOWN_DIRS "/steamcmd,/app,/dev/stdout,/dev/stderr"
+#ENV CHOWN_DIRS "/steamcmd,/app,\${V_RISING_SERVER_PERSISTENT_DATA_PATH},/dev/stdout,/dev/stderr"
 
-## FIXME: Fix for V Rising
 # Expose the volumes
 VOLUME [ "/steamcmd/vrising", "/app/vrising" ]
 

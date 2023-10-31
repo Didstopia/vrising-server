@@ -33,7 +33,7 @@ if [ -f "/app/Steam/appcache/appinfo.vdf" ]; then
 fi
 
 # Get the new build id directly from Steam
-NEW_BUILDID="$(./steamcmd/steamcmd.sh +login anonymous +app_info_update 1 +app_info_print "1829350" +quit | grep -EA 1000 "^\s+\"branches\"$" | grep -EA 5 "^\s+\"$V_RISING_SERVER_BRANCH\"$" | grep -m 1 -EB 10 "^\s+}$" | grep -E "^\s+\"buildid\"\s+" | tr '[:blank:]"' ' ' | tr -s ' ' | sed "s/ buildid //g" | xargs)"
+NEW_BUILDID="$(./steamcmd/steamcmd.sh +SteamCmdForcePlatformType windows +login anonymous +app_info_update 1 +app_info_print "1829350" +quit | grep -EA 1000 "^\s+\"branches\"$" | grep -EA 5 "^\s+\"$V_RISING_SERVER_BRANCH\"$" | grep -m 1 -EB 10 "^\s+}$" | grep -E "^\s+\"buildid\"\s+" | tr '[:blank:]"' ' ' | tr -s ' ' | sed "s/ buildid //g" | xargs)"
 
 # Check that we actually got a new build id
 STRING_SIZE=${#NEW_BUILDID}

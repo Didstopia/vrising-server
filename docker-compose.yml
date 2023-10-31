@@ -11,7 +11,7 @@ services:
 
     environment:
       # Configure the server
-      V_RISING_SERVER_PERSISTENT_DATA_PATH: "/app/vrising_test"
+      V_RISING_SERVER_PERSISTENT_DATA_PATH: "/app/vrising"
       V_RISING_SERVER_BRANCH: "public"
       # V_RISING_SERVER_START_MODE: "0" # Install/update and start server
       # V_RISING_SERVER_START_MODE: "1" # Install/update and exit
@@ -30,7 +30,9 @@ services:
       V_RISING_SERVER_MAX_CONNECTED_ADMINS: 1
       V_RISING_SERVER_SAVE_NAME: "test_server"
       V_RISING_SERVER_PASSWORD: "t35t"
-      V_RISING_SERVER_LIST_ON_MNASTER_SERVER: false
+      V_RISING_SERVER_LIST_ON_MASTER_SERVER: false
+      V_RISING_SERVER_LIST_ON_STEAM: false
+      V_RISING_SERVER_LIST_ON_EOS: false
       V_RISING_SERVER_AUTO_SAVE_COUNT: 5
       V_RISING_SERVER_AUTO_SAVE_INTERVAL: 10
       V_RISING_SERVER_GAME_SETTINGS_PRESET: "StandardPvE"
@@ -41,7 +43,7 @@ services:
       - "9878:9878/tcp"
 
     volumes:
-      - ./vrising_saves:/app/vrising_test
+      - ./vrising_saves:/app/vrising
       - ./vrising_data:/steamcmd/vrising
       # - vrising_saves:/app/vrising_test
       # - vrising_data:/steamcmd/vrising

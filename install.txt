@@ -1,4 +1,4 @@
-@sSteamCmdForcePlatformType linux
+@sSteamCmdForcePlatformType windows
 force_install_dir /steamcmd/vrising
 login anonymous
 app_info_update 1
