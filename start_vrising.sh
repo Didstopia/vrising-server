@@ -263,6 +263,7 @@ fi
 # cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE} ${V_RISING_SERVER_GAME_CONFIG_FILE_DEFAULT}
 
 # Apply the game settings
+jq '.ClanSize |= (env.V_RISING_SERVER_CLAN_SIZE|tonumber)' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
 if [ "$V_RISING_SERVER_DEFAULT_GAME_SETTINGS" = "true" ]; then
 	if [ "$V_RISING_SERVER_GAME_ENABLE_PVP" = "true" ]; then
 		# Enable PvP by setting "GameModeType" to "PvP"
@@ -291,6 +292,14 @@ if [ "$V_RISING_SERVER_DEFAULT_GAME_SETTINGS" = "true" ]; then
 			jq '.CastleDecayRateModifier |= 1.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
 		fi
 	fi
+fi
+
+
+if [ "$V_RISING_SERVER_GAME_SETTINGS_PRESET" = "Custom" || "$V_RISING_SERVER_CLAN_SIZE" != "4" ]; then
+  echo "Applying custom game configuration file.."
+  cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE} ${V_RISING_SERVER_GAME_CONFIG_FILE_DEFAULT}
+  cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE} "/steamcmd/vrising/VRisingServer_Data/StreamingAssets/GameSettingPresets/Custom.json"
+  cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE} "/steamcmd/vrising/VRisingServer_Data/StreamingAssets/GameSettingPresets/Custom"
 fi
 
 # Start mode 1 means we only want to update
