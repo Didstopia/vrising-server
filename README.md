@@ -31,6 +31,26 @@ You can also use a different branch via environment variables. For example, to i
 
 If using Docker for Windows *and* the File System passthrough option, make sure to add the git repo drive letter as a shared drive through the Docker GUI.
 
+## Troubleshooting
+
+### Server crashes on startup with "More than 2048 Allocators are registered"
+
+If the log shows a wall of `More than 2048 Allocators are registered. Reduce
+allocator count`, followed by `windows exception 0xc0000005` and a wine
+`setup_exception stack overflow`, you are hitting Unity's hard cap of 2048
+registered memory allocators on a **high-core-count host** (commonly a many-core
+Xeon, e.g. on TrueNAS Scale). V Rising (a Unity DOTS/ECS game) registers
+allocators per job worker thread, and Unity defaults the worker count to roughly
+`logical CPUs - 1`; on a 28C/56T box that blows past the cap and the server dies.
+
+This image caps the worker thread count by default via
+`V_RISING_SERVER_JOB_WORKER_COUNT` (default `8`), applied both through Unity's
+`boot.config` (`job-worker-count=`) and the `-job-worker-count` standalone-player
+argument. Lower it further if you still crash, or set it to `""`/`0` to restore
+Unity's auto-detection. See Unity's
+[Player command line arguments](https://docs.unity3d.com/Manual/PlayerCommandLineArguments.html)
+docs for details.
+
 ## License
 
 See [LICENSE](LICENSE)
