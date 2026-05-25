@@ -31,6 +31,25 @@ You can also use a different branch via environment variables. For example, to i
 
 If using Docker for Windows *and* the File System passthrough option, make sure to add the git repo drive letter as a shared drive through the Docker GUI.
 
+### Configuration
+
+There are two ways to configure the server, and they can be combined.
+
+**Hand-edit the JSON (default).** With `V_RISING_SERVER_DEFAULT_HOST_SETTINGS` and `V_RISING_SERVER_DEFAULT_GAME_SETTINGS` set to `false` (the default), the container leaves `ServerHostSettings.json` and `ServerGameSettings.json` in the mounted `/app/vrising/Settings` folder alone. Edit them once and your changes survive restarts. On first run the files are created from the server defaults.
+
+**Env vars.** Set `V_RISING_SERVER_DEFAULT_HOST_SETTINGS` / `V_RISING_SERVER_DEFAULT_GAME_SETTINGS` to `true` to regenerate the config from the `V_RISING_SERVER_*` env vars on every boot. This overwrites manual edits, so pick one approach per file.
+
+**JSON overrides.** For any setting without a dedicated env var, pass a JSON object that gets merged into the config last (it wins over both modes above):
+
+```yaml
+V_RISING_SERVER_HOST_SETTINGS_OVERRIDES: '{"ServerFps": 45, "LanMode": false}'
+V_RISING_SERVER_GAME_SETTINGS_OVERRIDES: '{"CastleDecayRateModifier": 0.5}'
+```
+
+RCON is configured from the `V_RISING_SERVER_RCON_*` vars whenever `V_RISING_SERVER_RCON_ENABLED` is `true`, regardless of the above, so graceful shutdown keeps working.
+
+Note: if `GameSettingsPreset` is a non-empty preset name, the server loads that preset and ignores `ServerGameSettings.json`. Set it to `""` for your game settings (or game overrides) to take effect.
+
 ## Troubleshooting
 
 ### Server crashes on startup with "More than 2048 Allocators are registered"

@@ -207,8 +207,9 @@ fi
 
 ## TODO: This is a bit dumb at the moment, as it's always replacing the file,
 ##       even though it doesn't strictly need to, but same goes for the files above..
-# Setup and/or configure RCON
-if [ "$V_RISING_SERVER_DEFAULT_HOST_SETTINGS" = "true" ]; then
+# Setup RCON. Gated on RCON_ENABLED so the container's own graceful shutdown
+# (shutdown.sh uses rcon) keeps working even when host settings are managed by hand.
+if [ "$V_RISING_SERVER_RCON_ENABLED" = "true" ]; then
 	cat "${V_RISING_SERVER_HOST_CONFIG_FILE}" | jq '.Rcon = { "Enabled": (env.V_RISING_SERVER_RCON_ENABLED|test("true")), "Password": (env.V_RISING_SERVER_RCON_PASSWORD), "Port": (env.V_RISING_SERVER_RCON_PORT|tonumber) }' > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
 fi
 
@@ -262,9 +263,9 @@ fi
 # echo "Applying custom game configuration file.."
 # cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE} ${V_RISING_SERVER_GAME_CONFIG_FILE_DEFAULT}
 
-# Apply the game settings
-jq '.ClanSize |= (env.V_RISING_SERVER_CLAN_SIZE|tonumber)' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
+# Apply the game settings (only when env-driven config is enabled)
 if [ "$V_RISING_SERVER_DEFAULT_GAME_SETTINGS" = "true" ]; then
+	jq '.ClanSize |= (env.V_RISING_SERVER_CLAN_SIZE|tonumber)' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
 	if [ "$V_RISING_SERVER_GAME_ENABLE_PVP" = "true" ]; then
 		# Enable PvP by setting "GameModeType" to "PvP"
 		jq '.GameModeType |= "PvP"' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
@@ -292,14 +293,25 @@ if [ "$V_RISING_SERVER_DEFAULT_GAME_SETTINGS" = "true" ]; then
 			jq '.CastleDecayRateModifier |= 1.0' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
 		fi
 	fi
+	# The server loads game settings from the named preset, not ServerGameSettings.json,
+	# so mirror the result into the Custom preset when that preset is in use.
+	if [ "$V_RISING_SERVER_GAME_SETTINGS_PRESET" = "Custom" ] || [ "$V_RISING_SERVER_CLAN_SIZE" != "4" ]; then
+		echo "Applying custom game configuration file.."
+		cp -f "${V_RISING_SERVER_GAME_CONFIG_FILE}" "${V_RISING_SERVER_GAME_CONFIG_FILE_DEFAULT}"
+		cp -f "${V_RISING_SERVER_GAME_CONFIG_FILE}" "/steamcmd/vrising/VRisingServer_Data/StreamingAssets/GameSettingPresets/Custom.json"
+		cp -f "${V_RISING_SERVER_GAME_CONFIG_FILE}" "/steamcmd/vrising/VRisingServer_Data/StreamingAssets/GameSettingPresets/Custom"
+	fi
 fi
 
-
-if [ "$V_RISING_SERVER_GAME_SETTINGS_PRESET" = "Custom" || "$V_RISING_SERVER_CLAN_SIZE" != "4" ]; then
-  echo "Applying custom game configuration file.."
-  cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE} ${V_RISING_SERVER_GAME_CONFIG_FILE_DEFAULT}
-  cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE} "/steamcmd/vrising/VRisingServer_Data/StreamingAssets/GameSettingPresets/Custom.json"
-  cp -f ${V_RISING_SERVER_GAME_CONFIG_FILE} "/steamcmd/vrising/VRisingServer_Data/StreamingAssets/GameSettingPresets/Custom"
+# Merge user-supplied JSON overrides last (they win, in any mode). Invalid JSON
+# makes jq fail so the && skips the copy, leaving the file intact.
+if [ -n "$V_RISING_SERVER_HOST_SETTINGS_OVERRIDES" ]; then
+	echo "Merging host settings overrides.."
+	jq --argjson o "$V_RISING_SERVER_HOST_SETTINGS_OVERRIDES" '. * $o' "${V_RISING_SERVER_HOST_CONFIG_FILE}" > "/tmp/ServerHostSettings.json.tmp" && cp -f "/tmp/ServerHostSettings.json.tmp" "${V_RISING_SERVER_HOST_CONFIG_FILE}"
+fi
+if [ -n "$V_RISING_SERVER_GAME_SETTINGS_OVERRIDES" ]; then
+	echo "Merging game settings overrides.."
+	jq --argjson o "$V_RISING_SERVER_GAME_SETTINGS_OVERRIDES" '. * $o' "${V_RISING_SERVER_GAME_CONFIG_FILE}" > "/tmp/ServerGameSettings.json.tmp" && cp -f "/tmp/ServerGameSettings.json.tmp" "${V_RISING_SERVER_GAME_CONFIG_FILE}"
 fi
 
 # Start mode 1 means we only want to update

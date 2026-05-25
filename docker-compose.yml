@@ -36,6 +36,16 @@ services:
       V_RISING_SERVER_AUTO_SAVE_COUNT: 5
       V_RISING_SERVER_AUTO_SAVE_INTERVAL: 10
       V_RISING_SERVER_GAME_SETTINGS_PRESET: "StandardPvE"
+      # Config management. false (default): edit the JSON under the mounted
+      # /app/vrising/Settings yourself and it persists across restarts. true:
+      # regenerate the config from these env vars every boot (overwrites edits).
+      V_RISING_SERVER_DEFAULT_HOST_SETTINGS: false
+      V_RISING_SERVER_DEFAULT_GAME_SETTINGS: false
+      # Optional: merge arbitrary settings as JSON, applied last (wins over all).
+      # Note: with a non-empty GameSettingsPreset the server reads the preset, not
+      # ServerGameSettings.json, so set the preset to "" for game overrides to apply.
+      # V_RISING_SERVER_HOST_SETTINGS_OVERRIDES: '{"ServerFps": 45, "LanMode": false}'
+      # V_RISING_SERVER_GAME_SETTINGS_OVERRIDES: '{"CastleDecayRateModifier": 0.5}'
       # Cap Unity's job worker threads. Fixes the ">2048 Allocators registered"
       # -> 0xc0000005 -> wine stack overflow crash on high-core-count hosts
       # (e.g. a 28C/56T Xeon on TrueNAS Scale). Set to "" or 0 to let Unity

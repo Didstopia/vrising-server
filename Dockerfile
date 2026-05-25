@@ -73,8 +73,13 @@ ENV V_RISING_SERVER_PERSISTENT_DATA_PATH     = "/app/vrising"
 ENV V_RISING_SERVER_BRANCH                   = "public"
 ENV V_RISING_SERVER_START_MODE               = "0"
 ENV V_RISING_SERVER_UPDATE_MODE              = "0"
-ENV V_RISING_SERVER_DEFAULT_HOST_SETTINGS    = true
-ENV V_RISING_SERVER_DEFAULT_GAME_SETTINGS    = true
+# Config management. false (default): hand-edited JSON persists. true: regenerate
+# config from the V_RISING_SERVER_* env vars each boot. Note the correct ENV syntax.
+ENV V_RISING_SERVER_DEFAULT_HOST_SETTINGS="false"
+ENV V_RISING_SERVER_DEFAULT_GAME_SETTINGS="false"
+# Optional JSON merged into the config last, regardless of the flags above.
+ENV V_RISING_SERVER_HOST_SETTINGS_OVERRIDES=""
+ENV V_RISING_SERVER_GAME_SETTINGS_OVERRIDES=""
 
 # Setup environment variables for customizing the server
 ENV V_RISING_SERVER_NAME                     = "V Rising Docker Server"
