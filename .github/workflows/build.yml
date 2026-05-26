@@ -19,7 +19,7 @@ jobs:
     uses: Didstopia/docker-base-images/.github/workflows/downstream.yml@master
     with:
       image: didstopia/vrising-server
-      base-image: didstopia/base:nodejs-22-steamcmd-ubuntu-24.04
+      base-image: didstopia/base:nodejs-22-wine-steamcmd-ubuntu-24.04
       tags: latest
       platforms: linux/amd64
       # push and manual runs always build; the scheduled run only builds when
