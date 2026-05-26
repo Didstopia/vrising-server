@@ -1,7 +1,6 @@
 # V Rising Dedicated Server (in a container)
 
-[![Docker Automated build](https://img.shields.io/docker/automated/didstopia/vrising-server.svg)](https://hub.docker.com/r/didstopia/vrising-server/)
-[![Docker build status](https://img.shields.io/docker/build/didstopia/vrising-server.svg)](https://hub.docker.com/r/didstopia/vrising-server/)
+[![Build](https://github.com/Didstopia/vrising-server/actions/workflows/build.yml/badge.svg)](https://github.com/Didstopia/vrising-server/actions/workflows/build.yml)
 [![Docker Pulls](https://img.shields.io/docker/pulls/didstopia/vrising-server.svg)](https://hub.docker.com/r/didstopia/vrising-server/)
 [![Docker stars](https://img.shields.io/docker/stars/didstopia/vrising-server.svg)](https://hub.docker.com/r/didstopia/vrising-server)
 

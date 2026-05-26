@@ -1,25 +1,29 @@
-FROM --platform=amd64 didstopia/base:nodejs-12-steamcmd-ubuntu-18.04
+FROM --platform=amd64 didstopia/base:nodejs-22-steamcmd-ubuntu-24.04
 
 LABEL maintainer="Didstopia <support@didstopia.com>"
 
 # Fixes apt-get warnings
 ARG DEBIAN_FRONTEND=noninteractive
 
-## FIXME: Isn't libsdl2 already included in the base image?
-# Install dependencies
-RUN apt-get update && \
-	  apt-get install -y --no-install-recommends \
+# Install dependencies. Wine is the latest WineHQ stable; V Rising's Linux
+# guidance is to track latest stable (older wine fails on the .NET deps it uses).
+# The i386 arch + SteamCMD's 32-bit libs are in the base; libsdl2:i386 is not.
+RUN dpkg --add-architecture i386 && \
+    mkdir -pm755 /etc/apt/keyrings && \
+    wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key && \
+    wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/noble/winehq-noble.sources && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
       libsdl2-2.0-0:i386 \
       jq \
       xvfb \
       winbind \
-      wine-stable \
-      wine32 \
-      wine64 \
       winetricks \
       screen \
       net-tools \
       iproute2 && \
+    apt-get install -y --install-recommends winehq-stable && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Install VC redistributables
